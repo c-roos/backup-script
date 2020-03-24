@@ -22,3 +22,20 @@ would back up customers.db to a Google Drive folder callerd "Backups" every hour
 ```$ python3 backup.py my_creds.json store_backups users.db transactions.db```
 
 would back up users.db and transactions.db to a Google Drive folder called "store_backups" every day starting immediately.
+
+## PyDrive
+The Google Drive API wrapper used for this script, PyDrive, has a bug when used with `httplib2>0.15.0` that causes it to raise a `httplib2.RedirectMissingLocation` exception when uploading a large file. This is due to PyDrive not excluding HTTP status code 308, which the Google Drive API uses for resumable downloads, from httplib2's redirect codes. To solve this, change the following code in pydrive.auth:
+```python
+def Get_Http_Object(self):
+    http = httplib2.Http(timeout=self.http_timeout)
+    http = self.credentials.authorize(http)
+    return http
+```
+to:
+```python
+def Get_Http_Object(self):
+    http = httplib2.Http(timeout=self.http_timeout)
+    http.redirect_codes = http.redirect_codes - {308}
+    http = self.credentials.authorize(http)
+    return http
+```

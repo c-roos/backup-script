@@ -46,7 +46,7 @@ def main(credentials, folder, databases, interval, delay):
     backoff = False
     while True:
         if backoff:
-            time.sleep(300)
+            time.sleep(BACK_OFF_INTERVAL)
         now = time.time()
         try:
             backup_db(databases, gdrive, parent_id, now)
